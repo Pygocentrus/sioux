@@ -1,14 +1,18 @@
 var Sioux = function (options) {
-  this.serverUrl = options.serverUrl || "";
-  this.cb = options.cb || function (){};
-  this.token = options.token || null;
-  this.method = this.getMethod(options);
-  this.maxRequests = options.maxRequests || -1;
-  this.pageUrl = window.location.href;
-  this.shouldLog = options.shouldLog || null;
-  this.getBrowserInfo();
-  this.errors = [];
-  return this;
+  if (!options.serverUrl) {
+    throw new Error("Sioux: Please add a server URL.");
+  } else {
+    this.serverUrl = options.serverUrl || "";
+    this.cb = options.cb || function (){};
+    this.token = options.token || null;
+    this.method = this.getMethod(options);
+    this.maxRequests = options.maxRequests || -1;
+    this.pageUrl = window.location.href;
+    this.shouldLog = options.shouldLog || null;
+    this.getBrowserInfo();
+    this.errors = [];
+    return this;
+  }
 };
 
 Sioux.prototype.watch = function () {
@@ -42,23 +46,24 @@ Sioux.prototype.report = function (error) {
     "&url=" + this.pageUrl
   ].join("");
   if (this.shouldLog) {
-    console.log("Bug tracker: ", url);
+    console.log("Sioux: ", url);
   }
-  this.sendRequest(encodeURI(url), this.cb);
+  this.sendRequest(encodeURI(url));
 };
 
-Sioux.prototype.sendRequest = function (data, fn) {
-  var xmlhttp = window.XMLHttpRequest
-    ? new XMLHttpRequest()
-    : new ActiveXObject('Microsoft.XMLHTTP');
+Sioux.prototype.sendRequest = function (data) {
+  var _this = this,
+  xmlhttp = window.XMLHttpRequest
+  ? new XMLHttpRequest()
+  : new ActiveXObject('Microsoft.XMLHTTP');
 
   xmlhttp.onreadystatechange = function () {
     var response = xmlhttp.readyState === 4 && xmlhttp.status === 200
-      ? xmlhttp.responseText
-      : xmlhttp.status;
+    ? xmlhttp.responseText
+    : xmlhttp.status;
 
-    if (typeof fn !== 'undefined' && xmlhttp.readyState === 4) {
-      fn(response);
+    if (typeof _this.cb === 'function' && xmlhttp.readyState === 4) {
+      _this.cb(response);
     }
   };
 
@@ -74,8 +79,8 @@ Sioux.prototype.getMethod = function (options) {
   var method = options.method;
   if (method) {
     return ["POST", "GET"].indexOf(method.toUpperCase()) != -1
-      ? method.toUpperCase()
-      : "POST";
+    ? method.toUpperCase()
+    : "POST";
   } else {
     return "POST";
   }

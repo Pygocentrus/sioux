@@ -1,17 +1,21 @@
-var ExceptionHandler = function (options) {
-  this.serverUrl = options.serverUrl || "";
-  this.cb = options.cb || function (){};
-  this.token = options.token || null;
-  this.method = this.getMethod(options);
-  this.maxRequests = options.maxRequests || -1;
-  this.pageUrl = window.location.href;
-  this.shouldLog = options.shouldLog || null;
-  this.getBrowserInfo();
-  this.errors = [];
-  return this;
+var Sioux = function (options) {
+  if (!options.serverUrl) {
+    throw new Error("Sioux: Please add a server URL.");
+  } else {
+    this.serverUrl = options.serverUrl || "";
+    this.cb = options.cb || function (){};
+    this.token = options.token || null;
+    this.method = this.getMethod(options);
+    this.maxRequests = options.maxRequests || -1;
+    this.pageUrl = window.location.href;
+    this.shouldLog = options.shouldLog || null;
+    this.getBrowserInfo();
+    this.errors = [];
+    return this;
+  }
 };
 
-ExceptionHandler.prototype.watch = function () {
+Sioux.prototype.watch = function () {
   var _this = this;
   window.onerror = function (message, url, line, column) {
     var err = {
@@ -28,7 +32,7 @@ ExceptionHandler.prototype.watch = function () {
   return this;
 };
 
-ExceptionHandler.prototype.report = function (error) {
+Sioux.prototype.report = function (error) {
   var url = [
     "message=" + error.message,
     "&file=" + error.url,
@@ -42,23 +46,24 @@ ExceptionHandler.prototype.report = function (error) {
     "&url=" + this.pageUrl
   ].join("");
   if (this.shouldLog) {
-    console.log("Bug tracker: ", url);
+    console.log("Sioux: ", url);
   }
-  this.sendRequest(encodeURI(url), this.cb);
+  this.sendRequest(encodeURI(url));
 };
 
-ExceptionHandler.prototype.sendRequest = function (data, fn) {
-  var xmlhttp = window.XMLHttpRequest
-    ? new XMLHttpRequest()
-    : new ActiveXObject('Microsoft.XMLHTTP');
+Sioux.prototype.sendRequest = function (data) {
+  var _this = this,
+      xmlhttp = window.XMLHttpRequest
+        ? new XMLHttpRequest()
+        : new ActiveXObject('Microsoft.XMLHTTP');
 
   xmlhttp.onreadystatechange = function () {
     var response = xmlhttp.readyState === 4 && xmlhttp.status === 200
       ? xmlhttp.responseText
       : xmlhttp.status;
 
-    if (typeof fn !== 'undefined' && xmlhttp.readyState === 4) {
-      fn(response);
+    if (typeof _this.cb === 'function' && xmlhttp.readyState === 4) {
+      _this.cb(response);
     }
   };
 
@@ -70,7 +75,7 @@ ExceptionHandler.prototype.sendRequest = function (data, fn) {
   xmlhttp.send(data);
 };
 
-ExceptionHandler.prototype.getMethod = function (options) {
+Sioux.prototype.getMethod = function (options) {
   var method = options.method;
   if (method) {
     return ["POST", "GET"].indexOf(method.toUpperCase()) != -1
@@ -81,11 +86,11 @@ ExceptionHandler.prototype.getMethod = function (options) {
   }
 };
 
-ExceptionHandler.prototype.isMobile = function () {
+Sioux.prototype.isMobile = function () {
   return navigator.userAgent.match(/(iPad)|(iPhone)|(iPod)|(android)|(webOS)/i) !== null;
 };
 
-ExceptionHandler.prototype.getOs = function () {
+Sioux.prototype.getOs = function () {
   if (navigator.appVersion.indexOf("Win") != -1) return "Windows";
   if (navigator.appVersion.indexOf("Mac") != -1) return "MacOS";
   if (navigator.appVersion.indexOf("X11") != -1) return "UNIX";
@@ -97,7 +102,7 @@ ExceptionHandler.prototype.getOs = function () {
 * I would like to thank hims056 on StackOverflow,
 * see http://stackoverflow.com/a/11219680/3713038
 */
-ExceptionHandler.prototype.getBrowserInfo = function () {
+Sioux.prototype.getBrowserInfo = function () {
   var nAgt = navigator.userAgent,
       browserName,
       fullVersion,
