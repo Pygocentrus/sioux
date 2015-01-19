@@ -40,6 +40,7 @@ Sioux.prototype.report = function (error) {
     "&column=" + error.column,
     "&date=" + new Date(),
     "&ismobile=" + this.isMobile,
+    "&isretina=" + this.isRetina,
     "&os=" + this.os,
     "&browser=" + this.browser,
     "&version=" + this.version,
@@ -62,8 +63,8 @@ Sioux.prototype.sendRequest = function (data) {
 
   xmlhttp.onreadystatechange = function () {
     var response = xmlhttp.readyState === 4 && xmlhttp.status === 200
-      ? xmlhttp.responseText
-      : xmlhttp.status;
+        ? xmlhttp.responseText
+        : xmlhttp.status;
 
     if (typeof _this.cb === 'function' && xmlhttp.readyState === 4) {
       _this.cb(response);
@@ -91,6 +92,10 @@ Sioux.prototype.getMethod = function (options) {
 
 Sioux.prototype.isMobile = function () {
   return navigator.userAgent.match(/(iPad)|(iPhone)|(iPod)|(android)|(webOS)/i) !== null;
+};
+
+Sioux.prototype.isRetina = function () {
+  return window.devicePixelRatio > 1;
 };
 
 Sioux.prototype.getResolution = function () {
@@ -178,6 +183,7 @@ Sioux.prototype.getBrowserInfo = function () {
   this.browser = browserName;
   this.version = fullVersion;
   this.isMobile = this.isMobile();
+  this.isRetina = this.isRetina();
   this.resolution = this.getResolution();
   this.orientation = this.getOrientation();
   this.language = this.getLanguage();

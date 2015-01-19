@@ -14,6 +14,7 @@ Sioux is a simple bug watcher logging the exceptions that occur in your client's
 - `column`: The column's number.  
 - `date`: The date when the errors happened.  
 - `ismobile`: Whether it happened on a mobile device.  
+- `isretina`: Whether the device is retina.  
 - `os`: The operating system on which the error was thrown.  
 - `browser`: The target browser.  
 - `version`: The browser's version.  
