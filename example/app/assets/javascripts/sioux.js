@@ -9,8 +9,8 @@ var Sioux = function (options) {
     this.maxRequests = options.maxRequests || -1;
     this.pageUrl = window.location.href;
     this.shouldLog = options.shouldLog || null;
-    this.getBrowserInfo();
     this.errors = [];
+    this.getBrowserInfo();
     return this;
   }
 };
@@ -43,6 +43,9 @@ Sioux.prototype.report = function (error) {
     "&os=" + this.os,
     "&browser=" + this.browser,
     "&version=" + this.version,
+    "&language=" + this.language,
+    "&resolution=" + this.resolution,
+    "&orientation=" + this.orientation,
     "&url=" + this.pageUrl
   ].join("");
   if (this.shouldLog) {
@@ -53,14 +56,14 @@ Sioux.prototype.report = function (error) {
 
 Sioux.prototype.sendRequest = function (data) {
   var _this = this,
-  xmlhttp = window.XMLHttpRequest
-  ? new XMLHttpRequest()
-  : new ActiveXObject('Microsoft.XMLHTTP');
+      xmlhttp = window.XMLHttpRequest
+        ? new XMLHttpRequest()
+        : new ActiveXObject('Microsoft.XMLHTTP');
 
   xmlhttp.onreadystatechange = function () {
     var response = xmlhttp.readyState === 4 && xmlhttp.status === 200
-    ? xmlhttp.responseText
-    : xmlhttp.status;
+      ? xmlhttp.responseText
+      : xmlhttp.status;
 
     if (typeof _this.cb === 'function' && xmlhttp.readyState === 4) {
       _this.cb(response);
@@ -79,8 +82,8 @@ Sioux.prototype.getMethod = function (options) {
   var method = options.method;
   if (method) {
     return ["POST", "GET"].indexOf(method.toUpperCase()) != -1
-    ? method.toUpperCase()
-    : "POST";
+      ? method.toUpperCase()
+      : "POST";
   } else {
     return "POST";
   }
@@ -88,6 +91,18 @@ Sioux.prototype.getMethod = function (options) {
 
 Sioux.prototype.isMobile = function () {
   return navigator.userAgent.match(/(iPad)|(iPhone)|(iPod)|(android)|(webOS)/i) !== null;
+};
+
+Sioux.prototype.getResolution = function () {
+  if (window.screen.width) {
+    return window.screen.width + "x" + window.screen.height;
+  } else {
+    return "Unknown";
+  }
+};
+
+Sioux.prototype.getOrientation = function () {
+  return window.screen.orientation.type || "";
 };
 
 Sioux.prototype.getOs = function () {
@@ -98,15 +113,19 @@ Sioux.prototype.getOs = function () {
   return "Unknown OS";
 };
 
+Sioux.prototype.getLanguage = function () {
+  return navigator.language || "";
+};
+
 /**
 * I would like to thank hims056 on StackOverflow,
 * see http://stackoverflow.com/a/11219680/3713038
 */
 Sioux.prototype.getBrowserInfo = function () {
   var nAgt = navigator.userAgent,
-  browserName,
-  fullVersion,
-  ix;
+      browserName,
+      fullVersion,
+      ix;
 
   if ((verOffset = nAgt.indexOf("Opera")) != -1) {
     browserName = "Opera";
@@ -159,5 +178,8 @@ Sioux.prototype.getBrowserInfo = function () {
   this.browser = browserName;
   this.version = fullVersion;
   this.isMobile = this.isMobile();
+  this.resolution = this.getResolution();
+  this.orientation = this.getOrientation();
+  this.language = this.getLanguage();
   this.os = this.getOs();
 };

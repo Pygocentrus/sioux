@@ -17,9 +17,12 @@ Sioux is a simple bug watcher logging the exceptions that occur in your client's
 - `os`: The operating system on which the error was thrown.  
 - `browser`: The target browser.  
 - `version`: The browser's version.  
+- `language`: The browser's main language.  
+- `resolution`: The browser's resolution (widthxheight).  
+- `orientation`: The browser's orientation.  
 - `url`: The URL where the error happened.  
 
-### How do you settle it
+### How to settle it
 
 ```javascript
 var options = {
@@ -31,7 +34,7 @@ var options = {
     'value': document.querySelector('meta[name="csrf-token"]').content
   },
   shouldLog: true,
-  cb: function(serverResponse) {
+  cb: function (serverResponse) {
     console.info(serverResponse);
   }
 };

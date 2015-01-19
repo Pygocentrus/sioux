@@ -9,8 +9,8 @@ var Sioux = function (options) {
     this.maxRequests = options.maxRequests || -1;
     this.pageUrl = window.location.href;
     this.shouldLog = options.shouldLog || null;
-    this.getBrowserInfo();
     this.errors = [];
+    this.getBrowserInfo();
     return this;
   }
 };
@@ -43,6 +43,9 @@ Sioux.prototype.report = function (error) {
     "&os=" + this.os,
     "&browser=" + this.browser,
     "&version=" + this.version,
+    "&language=" + this.language,
+    "&resolution=" + this.resolution,
+    "&orientation=" + this.orientation,
     "&url=" + this.pageUrl
   ].join("");
   if (this.shouldLog) {
@@ -90,12 +93,28 @@ Sioux.prototype.isMobile = function () {
   return navigator.userAgent.match(/(iPad)|(iPhone)|(iPod)|(android)|(webOS)/i) !== null;
 };
 
+Sioux.prototype.getResolution = function () {
+  if (window.screen.width) {
+    return window.screen.width + "x" + window.screen.height;
+  } else {
+    return "Unknown";
+  }
+};
+
+Sioux.prototype.getOrientation = function () {
+  return window.screen.orientation.type || "";
+};
+
 Sioux.prototype.getOs = function () {
   if (navigator.appVersion.indexOf("Win") != -1) return "Windows";
   if (navigator.appVersion.indexOf("Mac") != -1) return "MacOS";
   if (navigator.appVersion.indexOf("X11") != -1) return "UNIX";
   if (navigator.appVersion.indexOf("Linux") != -1) return "Linux";
   return "Unknown OS";
+};
+
+Sioux.prototype.getLanguage = function () {
+  return navigator.language || "";
 };
 
 /**
@@ -159,5 +178,8 @@ Sioux.prototype.getBrowserInfo = function () {
   this.browser = browserName;
   this.version = fullVersion;
   this.isMobile = this.isMobile();
+  this.resolution = this.getResolution();
+  this.orientation = this.getOrientation();
+  this.language = this.getLanguage();
   this.os = this.getOs();
 };
